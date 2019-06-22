@@ -13,6 +13,9 @@ package racetrack;
 
 import racetrack.domain.LineSegment;
 import racetrack.domain.Point;
+import racetrack.gui.UserInterface;
+
+import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -28,9 +31,10 @@ public class Main {
 //        System.out.println(b.crosses(a));
 
         // test move
-        Point start = new Point(0,0);
-        Point end = new Point(start);
-        LineSegment vector = new LineSegment(start, end);
-
+//        Point start = new Point(0,0);
+//        Point end = new Point(start);
+//        LineSegment vector = new LineSegment(start, end);
+        // run gui
+        SwingUtilities.invokeLater(new UserInterface());
     }
 }

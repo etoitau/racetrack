@@ -37,6 +37,14 @@ public class Course {
         walls.add(new LineSegment(new Point(length, 0), new Point(length, height)));
     }
 
+    public int getLength() {
+        return length;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     public void addWall(LineSegment wall) {
         walls.add(wall);
     }
@@ -46,15 +54,20 @@ public class Course {
     }
 
     // let user remove wall by picking it's ends, note they might pick ends in reversed order
-    public void removeWall(LineSegment removeWall) {
+    // return true if a wall was removed
+    public boolean removeWall(LineSegment removeWall) {
+        boolean removed = false;
         LineSegment flipRemoveWall = new LineSegment(removeWall.getEnd(), removeWall.getStart());
         // start at 4 to skip the course border walls which should not be deleted
         Iterator<LineSegment> it = walls.listIterator(4);
         while (it.hasNext()) {
             LineSegment checkWall = it.next();
-            if(checkWall.equals(removeWall) || checkWall.equals(flipRemoveWall))
+            if(checkWall.equals(removeWall) || checkWall.equals(flipRemoveWall)) {
                 it.remove();
+                removed = true;
+            }
         }
+        return removed;
     }
 
     public void setStartLine(LineSegment start) {
@@ -77,17 +90,6 @@ public class Course {
         walls = new ArrayList<LineSegment>();
         startLine = null;
         checkPoint = null;
-    }
-
-    public void draw(Graphics g) {
-        g.setColor(WALL_COLOR);
-        for (LineSegment wall: walls) {
-            g.drawLine(wall.getStart().getX(), wall.getStart().getY(), wall.getEnd().getX(), wall.getEnd().getY());
-        }
-        g.setColor(START_COLOR);
-        g.drawLine(startLine.getStart().getX(), startLine.getStart().getY(), startLine.getEnd().getX(), startLine.getEnd().getY());
-        g.setColor(CHECK_COLOR);
-        g.drawLine(checkPoint.getStart().getX(), checkPoint.getStart().getY(), checkPoint.getEnd().getX(), checkPoint.getEnd().getY());
     }
 
     @Override
