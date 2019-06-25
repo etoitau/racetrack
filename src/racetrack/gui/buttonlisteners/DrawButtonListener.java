@@ -41,7 +41,7 @@ public class DrawButtonListener implements ActionListener {
         clearButtonHighlights();
     }
 
-    private void clearMouseListeners() {
+    protected void clearMouseListeners() {
         // clear any mouse listeners for other functions
         MouseListener[] mouseListeners = ui.getCourseDisplay().getMouseListeners();
         if (mouseListeners != null && mouseListeners.length > 0) {

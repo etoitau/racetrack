@@ -20,6 +20,11 @@ public class LineSegment {
         this.end = end;
     }
 
+    public LineSegment(LineSegment toCopy) {
+        this.start = new Point(toCopy.getStart());
+        this.end = new Point(toCopy.getEnd());
+    }
+
     public Point getStart() {
         return start;
     }

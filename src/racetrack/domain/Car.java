@@ -13,6 +13,8 @@ package racetrack.domain;
 import racetrack.game.Course;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,16 +25,62 @@ public class Car {
     private Color color;
     private Course course;
     private final int SIZE = 10;
+    private List<LineSegment> path;
+    private boolean crashed = false, pastCheckpoint = false, finished = false;
 
 
-    public Car(LineSegment v, Color c) {
+    public Car(LineSegment v, Course course, Color c) {
         this.vector = v;
+        this.course = course;
         this.color = c;
+        this.path = new ArrayList<LineSegment>();
+    }
+
+    public List<LineSegment> getPath() {
+        return path;
+    }
+
+    public List<LineSegment> getPathCopy() {
+        return new ArrayList<LineSegment>(path);
+    }
+
+    public LineSegment getLastMove() {
+        return path.get(path.size() - 1);
+    }
+
+    public boolean isCrashed() {
+        return crashed;
+    }
+
+    public boolean isPastCheckpoint() {
+        return pastCheckpoint;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public LineSegment getVector() {
+        return vector;
+    }
+
+    public void setIsPastCheckpoint(boolean state) {
+        pastCheckpoint = state;
+    }
+
+    public void setCrashed(boolean state) {
+        crashed = state;
+    }
+
+    public void setFinished(boolean state) {
+        finished = state;
     }
 
     public void move(Point destination) {
         // correct projected destination (end) to actual destination
         vector.setEnd(destination);
+        // add copy of actual vector to path
+        path.add(new LineSegment(vector));
         // subtract start vector to get new velocity (with start at 0, 0)
         vector.getEnd().subtract(vector.getStart());
         // move start of vector to destination by adding actual velocity
@@ -61,9 +109,21 @@ public class Car {
         return pointSet;
     }
 
-    public void draw(Graphics g) {
+    public void draw(Graphics g, int scale) {
         g.setColor(color);
-        g.fillOval(vector.getStart().getX() + SIZE / 2, vector.getStart().getY() + SIZE / 2, SIZE, SIZE);
+        for (LineSegment line : path) {
+            g.fillOval(line.getStart().getX() * scale + SIZE / 2, line.getStart().getY() * scale + SIZE / 2, SIZE, SIZE);
+            g.drawLine(line.getStart().getX() * scale, line.getStart().getY() * scale,
+                    line.getEnd().getX() * scale, line.getEnd().getY() * scale);
+        }
+        g.fillOval(vector.getStart().getX() * scale + SIZE / 2, vector.getStart().getY() * scale + SIZE / 2, SIZE, SIZE);
+    }
+
+    public void drawOptions(Graphics g, int scale) {
+        g.setColor(color);
+        for (Point point: this.options()) {
+            g.drawOval(point.getX() * scale + SIZE / 2, point.getY() * scale + SIZE / 2, SIZE, SIZE);
+        }
     }
 
 }

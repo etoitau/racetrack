@@ -10,8 +10,11 @@
 
 package racetrack.gui;
 
+import racetrack.domain.Car;
 import racetrack.domain.LineSegment;
+import racetrack.domain.Point;
 import racetrack.game.Course;
+import racetrack.game.Race;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +22,7 @@ import java.util.List;
 
 public class CourseDisplay extends JPanel {
     private Course course;
+    private Race race;
     private int scale;
     private final int DOT = 2, WALL_DOT = 4;
     private final Color WALL_COLOR = Color.BLACK, START_COLOR = new Color(50, 160, 30), CHECK_COLOR = Color.BLUE;
@@ -35,6 +39,8 @@ public class CourseDisplay extends JPanel {
         drawGrid(g);
         drawWalls(g);
         drawStartAndCheck(g);
+        drawCars(g);
+        drawActiveCar(g);
     }
 
     public int getScale() {
@@ -43,6 +49,14 @@ public class CourseDisplay extends JPanel {
 
     public Course getCourse() {
         return course;
+    }
+
+    public Race getRace() {
+        return race;
+    }
+
+    public void setRace(Race race) {
+        this.race = race;
     }
 
     private void drawGrid(Graphics g) {
@@ -137,4 +151,23 @@ public class CourseDisplay extends JPanel {
         g.drawLine(line.getEnd().getX() * scale + tipXPrime, line.getEnd().getY() * scale + tipYPrime,
                 line.getEnd().getX() * scale + retXPrimeLeft, line.getEnd().getY() * scale + retYPrimeLeft);
     }
+
+    private void drawCars(Graphics g) {
+        if (race == null) { return; }
+        if(race.getCars() == null) { return; }
+        // draw all the cars (with paths)
+        for (Car car : race.getCars()) {
+            car.draw(g, scale);
+        }
+    }
+
+    private void drawActiveCar(Graphics g) {
+        if (race == null) { return; }
+        Car car = race.getActiveCar();
+        if(car == null)
+            return;
+        car.draw(g, scale);
+        car.drawOptions(g, scale);
+    }
 }
+
