@@ -36,6 +36,14 @@ public class Car {
         this.path = new ArrayList<LineSegment>();
     }
 
+    public Car(Car toCopy, Color c) {
+        this.vector = new LineSegment(toCopy.getVector());
+        this.course = toCopy.getCourse();
+        this.color = c;
+        this.path = new ArrayList<LineSegment>(toCopy.getPath());
+        this.pastCheckpoint = toCopy.isPastCheckpoint();
+    }
+
     public List<LineSegment> getPath() {
         return path;
     }
@@ -62,6 +70,10 @@ public class Car {
 
     public LineSegment getVector() {
         return vector;
+    }
+
+    public Course getCourse() {
+        return course;
     }
 
     public void setIsPastCheckpoint(boolean state) {
@@ -109,20 +121,25 @@ public class Car {
         return pointSet;
     }
 
-    public void draw(Graphics g, int scale) {
+    public void draw(Graphics g, int scale, int turn) {
         g.setColor(color);
-        for (LineSegment line : path) {
-            g.fillOval(line.getStart().getX() * scale + SIZE / 2, line.getStart().getY() * scale + SIZE / 2, SIZE, SIZE);
+        for (int i = 0; i < Math.min(turn, path.size()); i++) {
+            LineSegment line = path.get(i);
+            g.fillOval(line.getStart().getX() * scale - SIZE / 2, line.getStart().getY() * scale - SIZE / 2, SIZE, SIZE);
             g.drawLine(line.getStart().getX() * scale, line.getStart().getY() * scale,
                     line.getEnd().getX() * scale, line.getEnd().getY() * scale);
         }
-        g.fillOval(vector.getStart().getX() * scale + SIZE / 2, vector.getStart().getY() * scale + SIZE / 2, SIZE, SIZE);
+        g.fillOval(vector.getStart().getX() * scale - SIZE / 2, vector.getStart().getY() * scale - SIZE / 2, SIZE, SIZE);
+    }
+
+    public void draw(Graphics g, int scale) {
+        this.draw(g, scale, path.size());
     }
 
     public void drawOptions(Graphics g, int scale) {
         g.setColor(color);
         for (Point point: this.options()) {
-            g.drawOval(point.getX() * scale + SIZE / 2, point.getY() * scale + SIZE / 2, SIZE, SIZE);
+            g.drawOval(point.getX() * scale - SIZE / 2, point.getY() * scale - SIZE / 2, SIZE, SIZE);
         }
     }
 

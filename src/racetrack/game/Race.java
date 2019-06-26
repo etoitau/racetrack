@@ -32,18 +32,19 @@ public class Race {
         LineSegment start = course.getStartLine();
         int startX = (start.getStart().getX() + start.getEnd().getX()) / 2;
         int startY = (start.getStart().getY() + start.getEnd().getY()) / 2;
-        Point startPoint = new Point(startX, startY);
         for (int i = 0; i < numberOfRacers; i++) {
-            cars.add(new Car(new LineSegment(startPoint, startPoint), course, colorGen.getColor()));
+            cars.add(new Car(new LineSegment(new Point(startX, startY), new Point(startX, startY)), course, colorGen.getColor()));
         }
+        activeCar = cars.get(index);
     }
 
     public void nextCar() {
         activeCar = cars.get(index);
         index++;
-        index %= cars.size();
-        if (activeCar.isCrashed())
-            this.nextCar();
+        if (index == cars.size()) {
+            index = 0;
+            turn++;
+        }
     }
 
     public void setActiveCar(Car car) {
@@ -76,16 +77,17 @@ public class Race {
                 car.setFinished(true);
             }
         }
-
     }
 
     public int getTurn() {
         return turn;
     }
 
+    public void setTurn(int turn) {
+        this.turn = turn;
+    }
+
     public int getIndex() {
         return index;
     }
-
-
 }

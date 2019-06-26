@@ -26,6 +26,10 @@ public class RaceButtonListener extends DrawButtonListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         clearMouseListeners();
-        ui.raceStart(numberOfRacers);
+        if (numberOfRacers > 0) {
+            ui.raceStart(numberOfRacers);
+        } else {
+            ui.runSimulation();
+        }
     }
 }

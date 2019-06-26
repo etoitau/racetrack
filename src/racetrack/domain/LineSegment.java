@@ -63,14 +63,17 @@ public class LineSegment {
 
     private static int orient(Point a, Point b, Point c) {
         // www.cs.cmu.edu/~quake/robust.html
-        // returns positive int if a, b, and c are in ccw arrangement, negative if clockwise, 0 if colinear
+        // note sign is flipped due to y axis pointing down
+        // returns Negative int if a, b, and c are in ccw arrangement, Positive if clockwise, 0 if colinear
         return (a.getX() - c.getX()) * (b.getY() - c.getY()) - (b.getX() - c.getX()) * (a.getY() - c.getY());
     }
 
     // this crosses gate such that start of gate is to this' left and end of gate is to this' right
     public boolean gateCross(LineSegment gate) {
-        return this.crosses(gate) && LineSegment.orient(gate.getStart(), gate.getEnd(), this.end) > -1 &&
-                LineSegment.orient(gate.getStart(), gate.getEnd(), this.start) < 0;
+        boolean crossesGate = this.crosses(gate);
+        boolean endAcross = LineSegment.orient(gate.getStart(), gate.getEnd(), this.end) < 1;
+        boolean startNotAcross = LineSegment.orient(gate.getStart(), gate.getEnd(), this.start) > 0;
+        return crossesGate && endAcross && startNotAcross;
     }
 
     @Override

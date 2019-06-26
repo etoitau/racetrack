@@ -24,6 +24,7 @@ public class CourseDisplay extends JPanel {
     private Course course;
     private Race race;
     private int scale;
+    private boolean simMode = false;
     private final int DOT = 2, WALL_DOT = 4;
     private final Color WALL_COLOR = Color.BLACK, START_COLOR = new Color(50, 160, 30), CHECK_COLOR = Color.BLUE;
 
@@ -57,6 +58,14 @@ public class CourseDisplay extends JPanel {
 
     public void setRace(Race race) {
         this.race = race;
+    }
+
+    public void setSimMode(boolean isSim) {
+        this.simMode = isSim;
+    }
+
+    public boolean isSimMode() {
+        return simMode;
     }
 
     private void drawGrid(Graphics g) {
@@ -157,12 +166,16 @@ public class CourseDisplay extends JPanel {
         if(race.getCars() == null) { return; }
         // draw all the cars (with paths)
         for (Car car : race.getCars()) {
-            car.draw(g, scale);
+            if(simMode) {
+                car.draw(g, scale, race.getTurn());
+            } else {
+                car.draw(g, scale);
+            }
         }
     }
 
     private void drawActiveCar(Graphics g) {
-        if (race == null) { return; }
+        if (race == null || simMode) { return; }
         Car car = race.getActiveCar();
         if(car == null)
             return;

@@ -33,8 +33,8 @@ public class MouseRaceListener extends CourseMouseListener {
         if(validOption()) {
             Race race = coursePanel.getRace();
             race.updateCar(race.getActiveCar(), new Point(x, y));
-            race.nextCar();
             ui.raceUpdate();
+            ui.getCourseDisplay().repaint();
         }
     }
 

@@ -13,6 +13,7 @@ package racetrack.gui;
 import racetrack.domain.Car;
 import racetrack.game.Course;
 import racetrack.game.Race;
+import racetrack.game.SimulatedRace;
 import racetrack.gui.buttonlisteners.*;
 import racetrack.gui.mouselisteners.MouseRaceListener;
 
@@ -21,6 +22,7 @@ import java.awt.*;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class UserInterface implements Runnable {
 
@@ -72,6 +74,7 @@ public class UserInterface implements Runnable {
         window.getContentPane().remove(3);
         window.getContentPane().add(raceSetupButtons(), BorderLayout.WEST);
         message.setText("Choose racing mode");
+        courseDisplay.setRace(null);
     }
 
     public void raceStart(int racers) {
@@ -101,7 +104,7 @@ public class UserInterface implements Runnable {
         info.setText(raceStatus());
         List<Car> cars = race.getCars();
         int racers = cars.size();
-        int crashed = 0, indexFirstNotCrashed = 0, finished = 0, indexFinished = 0;
+        int crashed = 0, indexFirstNotCrashed = -1, finished = 0, indexFinished = 0;
 
         // survey cars
         for (int i = 0; i < cars.size(); i++) {
@@ -109,7 +112,7 @@ public class UserInterface implements Runnable {
             if (car.isCrashed()) {
                 crashed++;
             } else {
-                if (indexFirstNotCrashed == 0) {
+                if (indexFirstNotCrashed == -1) {
                     indexFirstNotCrashed = i;
                 }
                 if (car.isFinished()) {
@@ -118,23 +121,33 @@ public class UserInterface implements Runnable {
                 }
             }
         }
-        // is race over?
-        if ((finished > 0 && race.getActiveCar() == cars.get(indexFirstNotCrashed)) || crashed == racers) {
+
+        // all crashed?
+        if (crashed == racers) {
+            message.setText("All racers crashed! Race over");
+            MouseListener[] mouseListeners = courseDisplay.getMouseListeners();
+            courseDisplay.removeMouseListener(mouseListeners[0]);
+            return;
+        }
+
+        // set next non-crashed car as active
+        race.nextCar();
+        while(race.getActiveCar().isCrashed())
+            race.nextCar();
+
+        // if someone has finished and turn is completed
+        if (finished > 0 && race.getActiveCar() == cars.get(indexFirstNotCrashed)) {
             MouseListener[] mouseListeners = courseDisplay.getMouseListeners();
             courseDisplay.removeMouseListener(mouseListeners[0]);
             String messageText;
-            if (crashed == racers) {
-                messageText = "All racers crashed! Race over";
-            } else if (finished > 1) {
+            if (finished > 1) {
                 messageText = "Tie!";
             } else {
                 messageText = "Player " + (indexFinished + 1) + " is the winner!";
             }
             message.setText(messageText);
+            return;
         }
-    }
-
-    private void finishRace() {
 
     }
 
@@ -185,7 +198,7 @@ public class UserInterface implements Runnable {
         raceSetupButtons.add(fourRacers);
         raceSetupButtons.add(backToDraw);
 
-//        aiRace.addActionListener(new AIRaceButtonListener(this));
+        aiRace.addActionListener(new RaceButtonListener(this, 0));
         soloRace.addActionListener(new RaceButtonListener(this, 1));
         twoRacers.addActionListener(new RaceButtonListener(this, 2));
         threeRacers.addActionListener(new RaceButtonListener(this, 3));
@@ -226,7 +239,52 @@ public class UserInterface implements Runnable {
             }
             sb.append("Ready<br><br>");
         }
+        sb.append("</body></html>");
         return sb.toString();
+    }
+
+    public void runSimulation() {
+        SimulatedRace simRace = new SimulatedRace(courseDisplay.getCourse());
+        race = simRace.getRace();
+        courseDisplay.setRace(race);
+        courseDisplay.setSimMode(true);
+        race.setTurn(0);
+
+        List<Car> finishers = simRace.finishers();
+
+        window.getContentPane().remove(3);
+
+        JPanel raceInfo = new JPanel();
+        BoxLayout layout = new BoxLayout(raceInfo, BoxLayout.Y_AXIS);
+        raceInfo.setLayout(layout);
+        String infoText;
+        if (finishers.isEmpty()) {
+            infoText = "Problem with course, no finishers";
+        } else {
+            infoText = "<html><body>Shortest possible run: \n" + finishers.get(0).getPath().size() + " turns</body></html>";
+        }
+        info = new JLabel(infoText);
+        JButton back = new JButton("Back to Setup");
+        back.addActionListener(new RunButtonListener(this));
+        raceInfo.add(info);
+        raceInfo.add(back);
+
+        window.getContentPane().add(raceInfo, BorderLayout.WEST);
+
+        message.setText("Go!");
+
+        if (finishers.isEmpty()) { return; }
+
+        replay:
+        for (int i = 0; i < finishers.get(finishers.size() - 1).getPath().size(); i++) {
+            race.setTurn(i);
+            courseDisplay.repaint();
+//            try {
+//                TimeUnit.SECONDS.sleep(1);
+//            } catch (InterruptedException e) {
+//                break replay;
+//            }
+        }
     }
 
     public JFrame getWindow() {
