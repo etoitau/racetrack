@@ -29,7 +29,7 @@ public class RaceButtonListener extends DrawButtonListener {
         if (numberOfRacers > 0) {
             ui.raceStart(numberOfRacers);
         } else {
-            ui.runSimulation();
+            ui.runSolver();
         }
     }
 }

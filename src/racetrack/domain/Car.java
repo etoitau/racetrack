@@ -101,7 +101,7 @@ public class Car {
         vector.getEnd().add(vector.getStart());
     }
 
-    private boolean hitsWall(LineSegment trial) {
+    public boolean hitsWall(LineSegment trial) {
         // check if a move would cross a wall
         for (LineSegment wall : course.getWalls()) {
             if (trial.crosses(wall))

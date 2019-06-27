@@ -12,6 +12,7 @@ package racetrack.gui;
 
 import racetrack.domain.Car;
 import racetrack.game.Course;
+import racetrack.game.CourseSolver;
 import racetrack.game.Race;
 import racetrack.game.SimulatedRace;
 import racetrack.gui.buttonlisteners.*;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class UserInterface implements Runnable {
 
     private JFrame window;
-    private int scale = 25, length = 30, height = 20;
+    private int scale = 25, length = 10, height = 8;
     private CourseDisplay courseDisplay;
     private List<JToggleButton> buildButtons;
     private List<JButton> raceSetupButtons;
@@ -241,6 +242,13 @@ public class UserInterface implements Runnable {
         }
         sb.append("</body></html>");
         return sb.toString();
+    }
+
+    public void runSolver() {
+        race = new Race(courseDisplay.getCourse(), 0);
+        courseDisplay.setRace(race);
+        CourseSolver solver = new CourseSolver(courseDisplay);
+        System.out.println(solver.report());
     }
 
     public void runSimulation() {

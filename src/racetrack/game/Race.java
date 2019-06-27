@@ -35,7 +35,8 @@ public class Race {
         for (int i = 0; i < numberOfRacers; i++) {
             cars.add(new Car(new LineSegment(new Point(startX, startY), new Point(startX, startY)), course, colorGen.getColor()));
         }
-        activeCar = cars.get(index);
+        if (numberOfRacers > 0)
+            activeCar = cars.get(index);
     }
 
     public void nextCar() {

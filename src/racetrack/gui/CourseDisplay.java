@@ -44,6 +44,10 @@ public class CourseDisplay extends JPanel {
         drawActiveCar(g);
     }
 
+    public void paintNow() {
+        paintComponent(this.getGraphics());
+    }
+
     public int getScale() {
         return scale;
     }
@@ -161,7 +165,7 @@ public class CourseDisplay extends JPanel {
                 line.getEnd().getX() * scale + retXPrimeLeft, line.getEnd().getY() * scale + retYPrimeLeft);
     }
 
-    private void drawCars(Graphics g) {
+    public void drawCars(Graphics g) {
         if (race == null) { return; }
         if(race.getCars() == null) { return; }
         // draw all the cars (with paths)

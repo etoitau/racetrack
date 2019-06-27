@@ -31,7 +31,7 @@ public class StepNode {
         if (children == null)
             return -1;
         // try possible next moves 0-8
-        for (short i = 0; i < 8; i++) {
+        for (short i = 0; i < 9; i++) {
             // if we've tried this option before
             if (children.containsKey(i)) {
                 // if it was a crash, try next option, else it's viable - return it
@@ -51,8 +51,8 @@ public class StepNode {
         return -1;
     }
 
-    public void killNode() {
-        children = null;
+    public void killNode(short i) {
+        parent.getChildren().put(i, null);
     }
 
     public HashMap<Short,StepNode> getChildren() {
