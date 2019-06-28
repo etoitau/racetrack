@@ -121,19 +121,23 @@ public class Car {
         return pointSet;
     }
 
-    public void draw(Graphics g, int scale, int turn) {
+    public void draw(Graphics g, int scale, int turn, int size) {
         g.setColor(color);
         for (int i = 0; i < Math.min(turn, path.size()); i++) {
             LineSegment line = path.get(i);
-            g.fillOval(line.getStart().getX() * scale - SIZE / 2, line.getStart().getY() * scale - SIZE / 2, SIZE, SIZE);
+            g.fillOval(line.getStart().getX() * scale - size / 2, line.getStart().getY() * scale - size / 2, size, size);
             g.drawLine(line.getStart().getX() * scale, line.getStart().getY() * scale,
                     line.getEnd().getX() * scale, line.getEnd().getY() * scale);
         }
-        g.fillOval(vector.getStart().getX() * scale - SIZE / 2, vector.getStart().getY() * scale - SIZE / 2, SIZE, SIZE);
+        g.fillOval(vector.getStart().getX() * scale - size / 2, vector.getStart().getY() * scale - size / 2, size, size);
     }
 
     public void draw(Graphics g, int scale) {
-        this.draw(g, scale, path.size());
+        this.draw(g, scale, path.size(), SIZE);
+    }
+
+    public void draw(Graphics g, int scale, int size) {
+        this.draw(g, scale, path.size(), size);
     }
 
     public void drawOptions(Graphics g, int scale) {

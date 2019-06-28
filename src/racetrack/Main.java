@@ -20,15 +20,15 @@ import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         // test intersection
-//        Point aStart = new Point(0, 0);
-//        Point aEnd = new Point(0, 3);
+//        Point aStart = new Point(1, 1);
+//        Point aEnd = new Point(1, 1);
 //        LineSegment a = new LineSegment(aStart, aEnd);
 //
-//        Point bStart = new Point(0, 2);
-//        Point bEnd = new Point(0, 4);
+//        Point bStart = new Point(0, 0);
+//        Point bEnd = new Point(0, 10);
 //        LineSegment b = new LineSegment(bStart, bEnd);
 //
-//        System.out.println(b.crosses(a));
+//        System.out.println(a.crosses(b));
 
         // test move
 //        Point start = new Point(0,0);

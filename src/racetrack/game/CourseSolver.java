@@ -32,154 +32,104 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class CourseSolver {
+
+
     private Course course;
     private CourseDisplay courseDisplay;
     private int maxTurns, minToCheck = Integer.MAX_VALUE, minToFinish = Integer.MAX_VALUE, checkPointGrace = 3;
-    private List<Short> bestSteps;
     private Car bestCar;
     private StepExplorer explorer;
-    private long runs = 0;
+    private long runs = 0, runStartTime;
+    private LineSegment start;
+    private LineSegment init;
+    private short startBias, stdBias;
+
+    public LineSegment getStart() {
+        return start;
+    }
+
+    public LineSegment getInit() {
+        return init;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public int getMaxTurns() {
+        return maxTurns;
+    }
+
+    public int getMinToCheck() {
+        return minToCheck;
+    }
+
+    public void setMinToCheck(int minToCheck) {
+        this.minToCheck = minToCheck;
+    }
+
+    public int getMinToFinish() {
+        return minToFinish;
+    }
+
+    public void setMinToFinish(int minToFinish) {
+        this.minToFinish = minToFinish;
+    }
+
+    public int getCheckPointGrace() {
+        return checkPointGrace;
+    }
+
+    public Car getBestCar() {
+        return bestCar;
+    }
+
+    public void setBestCar(Car car) {
+        this.bestCar = car;
+    }
+
+    public StepExplorer getExplorer() {
+        return explorer;
+    }
+
+    public short getStartBias() {
+        return startBias;
+    }
+
+    public short getStdBias() {
+        return stdBias;
+    }
+
+    public long getRunStartTime() {
+        return runStartTime;
+    }
 
     public CourseSolver(CourseDisplay cd) {
         this.course = cd.getCourse();
         this.courseDisplay = cd;
         this.maxTurns = maxPath();
-        this.explorer = new StepExplorer();
-        simulate();
+        this.start = course.getStartLine();
+        this.init = initialVector();
+        this.runStartTime = System.currentTimeMillis();
+        this.startBias = findStartDirection();
+        this.stdBias = 4; // which direction to try first, typically
+        this.explorer = new StepExplorer(startBias);
     }
 
-    private void simulate() {
-        LineSegment start = course.getStartLine();
+    private LineSegment initialVector() {
         int startX = (start.getStart().getX() + start.getEnd().getX()) / 2;
         int startY = (start.getStart().getY() + start.getEnd().getY()) / 2;
-        LineSegment init = new LineSegment(new Point(startX, startY), new Point(startX, startY));
-        long startTime = System.currentTimeMillis();
-        short startBias = findStartDirection();
-        short stdBias = 4;
-        // bias says which direction to try first
-        // for first step we pick direction start is pointing
-        // after that default is to coast
-        
-        eachCar:
-        while (explorer.hasNext()) {
-
-            // initialize car for run
-            List<Short> steps = new ArrayList<>();
-            Car car = new Car(new LineSegment(init), course, Color.RED);
-            short step = explorer.getFirstStep();
-            steps.add(step);
-            runs++;
-            // termporary limit on how long it runs
-//            if (runs > 500000) {
-//                break;
-//            }
-
-            // run course using steps
-            runCar:
-            while (true) {
-                short bias = stdBias;
-                if (steps.size() == 1) {
-                    bias = startBias;
-                }
-                // execute step
-                Point dest = car.getVector().getEnd().adjacents().get( (step + bias) % 9);
-                car.move(dest);
-                int outcome = this.checkMove(car, steps);
-                // display run on exit
-                long thisTime = System.currentTimeMillis();
-                if (outcome != 1 && thisTime - startTime > 4000) {
-                    startTime = thisTime;
-                    courseDisplay.getRace().setActiveCar(car);
-                    courseDisplay.paintNow();
-                    System.out.println(this.report());
-                }
-
-                // if no good
-                if (outcome == 0) {
-                    explorer.killCurrent();
-//                    System.out.println(steps);
-//                    System.out.println(car.getPath());
-                    continue eachCar;
-                // if just passed checkpoint
-                } else if (outcome == 2) {
-                    if (steps.size() < minToCheck) {
-                        minToCheck = steps.size();
-                    }
-                // if just passed finish
-                } else if (outcome == 3) {
-                    if (steps.size() < minToFinish) {
-                        minToFinish = steps.size();
-                        bestSteps = steps;
-                        bestCar = car;
-                        if (courseDisplay.getRace().getCars().size() == 0) {
-                            courseDisplay.getRace().getCars().add(new Car(car, Color.BLUE));
-                        } else {
-                            courseDisplay.getRace().getCars().set(0, new Car(car, Color.BLUE));
-                        }
-                    }
-                    explorer.killCurrent();
-                    continue eachCar;
-                }
-                // get next step
-                step = explorer.getNextStep();
-                if (step < 0) {
-                    continue eachCar;
-                }
-                // add step to steps
-                steps.add(step);
-            }
-        }
-        System.out.println("Solver done");
-        courseDisplay.getRace().setActiveCar(bestCar);
-        courseDisplay.paintNow();
+        return new LineSegment(new Point(startX, startY), new Point(startX, startY));
     }
 
-    private int checkMove(Car car, List<Short> steps) {
-        // return:
-        // 0 - no good
-        // 1 - nothing to report
-        // 2 - just passed checkpoint
-        // 3 - just passed finish line
-        LineSegment lastMove = car.getLastMove();
-        int outcome = 1;
-        // check for crash
-        if (car.hitsWall(lastMove)) {
-            return 0;
-        }
-        // check past checkpoint
-        if (lastMove.gateCross(course.getCheckPoint())) {
-            car.setIsPastCheckpoint(true);
-            outcome = 2;
-        }
-        // check if just crossed finish line (after checkpoint)
-        if (car.isPastCheckpoint()) {
-            if (lastMove.gateCross(course.getStartLine())) {
-                car.setFinished(true);
-                return 3;
-            }
-        }
-        // check for too slow to checkpoint
-        if (!car.isPastCheckpoint()) {
-            if (steps.size() - checkPointGrace > minToCheck) {
-                return 0;
-            }
-        }
-        // check for time to finish
-        if (!car.isFinished() && steps.size() > minToFinish) {
-            return 0;
-        }
-        // check run is too long
-        if (steps.size() > maxTurns) {
-            return 0;
-        }
-        // check for looping
-        List<LineSegment> path = car.getPath();
-        for (int i = 0; i < path.size() - 1; i++) {
-            if (path.get(i).equals(lastMove)) {
-                return 0;
-            }
-        }
-        return outcome;
+    public boolean hasNext() {
+        return explorer.hasNext();
+    }
+
+    public Car nextCar() {
+        runs++;
+        Solution solution = new Solution(this);
+        return solution.runCar();
     }
 
     private int maxPath() {
@@ -191,19 +141,23 @@ public class CourseSolver {
         if (runs == 0) {
             return "Not run yet";
         }
-        StringBuilder sb = new StringBuilder("Solver Report");
-        sb.append("\nRuns performed: ").append(runs);
-        sb.append("\nMax Turns allowed: ").append(maxTurns);
+        StringBuilder sb = new StringBuilder("<html><body>Solver Report");
+        sb.append("<br>Runs performed: ").append(runs);
+        sb.append("<br>Elapsed time: ").append((System.currentTimeMillis() - runStartTime) / 1000).append(" seconds");
         if (minToCheck > maxTurns) {
-            sb.append(("\nNone made it to checkpoint"));
+            sb.append(("<br>None made it to checkpoint"));
         } else {
-            sb.append("\nBest time to checkpoint: ").append(minToCheck);
+            sb.append("<br>Best time to checkpoint: ").append(minToCheck);
         }
-        if (bestSteps == null) {
-            sb.append("\nNo finishers");
+        if (bestCar == null) {
+            sb.append("<br>No finishers");
         } else {
-            sb.append("\nBest finisher: ").append(minToFinish);
+            sb.append("<br>Best finisher: ").append(minToFinish);
         }
+        if (!explorer.hasNext()) {
+            sb.append("<br><br><b>Run complete</b>");
+        }
+        sb.append("</body></html>");
         return sb.toString();
     }
 

@@ -25,7 +25,7 @@ public class CourseDisplay extends JPanel {
     private Race race;
     private int scale;
     private boolean simMode = false;
-    private final int DOT = 2, WALL_DOT = 4;
+    private final int DOT = 2, WALL_DOT = 4, TYP_CAR_DOT = 8, ACTIVE_CAR_DOT = 10;
     private final Color WALL_COLOR = Color.BLACK, START_COLOR = new Color(50, 160, 30), CHECK_COLOR = Color.BLUE;
 
     public CourseDisplay(Course course, int scale) {
@@ -40,8 +40,8 @@ public class CourseDisplay extends JPanel {
         drawGrid(g);
         drawWalls(g);
         drawStartAndCheck(g);
-        drawCars(g);
         drawActiveCar(g);
+        drawCars(g);
     }
 
     public void paintNow() {
@@ -173,7 +173,7 @@ public class CourseDisplay extends JPanel {
             if(simMode) {
                 car.draw(g, scale, race.getTurn());
             } else {
-                car.draw(g, scale);
+                car.draw(g, scale, TYP_CAR_DOT);
             }
         }
     }
@@ -183,8 +183,9 @@ public class CourseDisplay extends JPanel {
         Car car = race.getActiveCar();
         if(car == null)
             return;
-        car.draw(g, scale);
-        car.drawOptions(g, scale);
+        car.draw(g, scale, ACTIVE_CAR_DOT);
+        if (!car.isFinished() && !car.isCrashed())
+            car.drawOptions(g, scale);
     }
 }
 

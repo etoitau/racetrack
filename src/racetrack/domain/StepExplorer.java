@@ -18,10 +18,10 @@ public class StepExplorer {
     private StepNode head;
     private List<Short> current;
 
-    public StepExplorer() {
+    public StepExplorer(short startBias) {
         head = new StepNode();
         // first move should never be to stay put
-        head.getChildren().put((short) 4, null);
+        head.getChildren().put((short) (4 - startBias), null);
         current = new ArrayList<>();
     }
 
@@ -29,8 +29,12 @@ public class StepExplorer {
         short next;
         next = this.getCurrentLeaf().getNext();
         if (next < 0) {
-            if (current.size() > 0)
+            if (current.size() > 0) {
                 this.getCurrentLeaf().killNode(current.get(current.size() - 1));
+            } else {
+                head = null;
+            }
+
         } else{
             current.add(next);
         }
@@ -43,7 +47,6 @@ public class StepExplorer {
         } else {
             head = null;
         }
-
     }
 
     public Short getFirstStep() {

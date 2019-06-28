@@ -43,12 +43,12 @@ public class LineSegment {
 
     // do two line segments intersect?
     public boolean crosses(LineSegment other) {
-        int check1 = LineSegment.orient(this.start, this.end, other.getStart());
-        int check2 = LineSegment.orient(this.start, this.end, other.getEnd());
-        int check3 = LineSegment.orient(other.getStart(), other.getEnd(), this.start);
-        int check4 = LineSegment.orient(other.getStart(), other.getEnd(), this.end);
+        int check1 = LineSegment.orient(this.start, this.end, other.getStart()); // 0
+        int check2 = LineSegment.orient(this.start, this.end, other.getEnd()); // 0
+        int check3 = LineSegment.orient(other.getStart(), other.getEnd(), this.start); // 10
+        int check4 = LineSegment.orient(other.getStart(), other.getEnd(), this.end); // 10
         // if segments are colinear
-        if (check1 == 0 && check2 == 0) {
+        if (check1 == 0 && check2 == 0 && check3 == 0 && check4 == 0) {
             if (Math.min(this.start.manhattanLength(), this.end.manhattanLength()) <
                     Math.max(other.start.manhattanLength(), other.end.manhattanLength())) {
                 return (Math.max(this.start.manhattanLength(), this.end.manhattanLength()) >

@@ -14,16 +14,16 @@ import racetrack.domain.Car;
 import racetrack.game.Course;
 import racetrack.game.CourseSolver;
 import racetrack.game.Race;
-import racetrack.game.SimulatedRace;
 import racetrack.gui.buttonlisteners.*;
+import racetrack.gui.keylisteners.SolverKeyListener;
 import racetrack.gui.mouselisteners.MouseRaceListener;
+import racetrack.gui.mouselisteners.runSolverMouseListener;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class UserInterface implements Runnable {
 
@@ -32,8 +32,24 @@ public class UserInterface implements Runnable {
     private CourseDisplay courseDisplay;
     private List<JToggleButton> buildButtons;
     private List<JButton> raceSetupButtons;
-    private JLabel message, info;
+    private JLabel message;
+    private JTextPane info;
     private Race race;
+    private JButton back;
+    private Dimension infoPanelDim = new Dimension(200, height * scale),
+                infoLabelDim = new Dimension(180, height * scale - 30);
+
+    public CourseDisplay getCourseDisplay() {
+        return courseDisplay;
+    }
+
+    public List<JToggleButton> getBuildButtons() {
+        return buildButtons;
+    }
+
+    public JLabel getMessage() {
+        return message;
+    }
 
     @Override
     public void run() {
@@ -47,12 +63,13 @@ public class UserInterface implements Runnable {
         window.setVisible(true);
     }
 
+    // initialize and display ui components
     private void createComponents(Container container) {
         container.setLayout(new BorderLayout());
 
         Course course = new Course(length, height);
         courseDisplay = new CourseDisplay(course, scale);
-        courseDisplay.setPreferredSize(new Dimension(length * scale + scale, height * scale + scale));
+        courseDisplay.setPreferredSize(new Dimension(length * scale, height * scale));
         container.add(courseDisplay, BorderLayout.CENTER);
 
         JLabel title = new JLabel("Racetrack");
@@ -61,46 +78,140 @@ public class UserInterface implements Runnable {
         message = new JLabel("");
         container.add(message, BorderLayout.SOUTH);
 
+        // at first, want drawing buttons
         drawSetup();
     }
 
+    // set up drawing button pane
     public void drawSetup() {
+        // set up drawing buttons
         if (window.getContentPane().getComponentCount() == 4)
             window.getContentPane().remove(3);
         window.getContentPane().add(builderButtons(), BorderLayout.WEST);
         message.setText("Choose drawing option");
     }
 
+    // make panel with drawing buttons
+    private JPanel builderButtons() {
+        JPanel buttonPanel = new JPanel();
+        BoxLayout layout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
+        buttonPanel.setLayout(layout);
+        buttonPanel.setPreferredSize(infoPanelDim);
+
+        JToggleButton drawWalls = new JToggleButton("Draw Walls");
+        JToggleButton drawStart = new JToggleButton("Draw Start");
+        JToggleButton drawCheck = new JToggleButton("Draw CheckPoint");
+        JButton race = new JButton("Done");
+
+        buildButtons = new ArrayList<JToggleButton>();
+        buildButtons.add(drawWalls);
+        buildButtons.add(drawStart);
+        buildButtons.add(drawCheck);
+
+        drawWalls.addActionListener(new DrawWallButtonListener(this));
+        drawStart.addActionListener(new DrawStartButtonListener(this));
+        drawCheck.addActionListener(new DrawCheckButtonListener(this));
+        race.addActionListener(new RunButtonListener(this)); // calls raceSetup if done drawing
+
+        buttonPanel.add(drawWalls);
+        buttonPanel.add(drawStart);
+        buttonPanel.add(drawCheck);
+        buttonPanel.add(race);
+        return buttonPanel;
+    }
+
+    // set up race configuration pane
     public void raceSetup() {
         window.getContentPane().remove(3);
         window.getContentPane().add(raceSetupButtons(), BorderLayout.WEST);
         message.setText("Choose racing mode");
         courseDisplay.setRace(null);
+        courseDisplay.paintNow();
     }
 
-    public void raceStart(int racers) {
+    // make panel with race configuration buttons
+    private JPanel raceSetupButtons() {
+        JPanel buttonPanel = new JPanel();
+        BoxLayout layout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
+        buttonPanel.setLayout(layout);
+        buttonPanel.setPreferredSize(infoPanelDim);
+
+        JButton aiRace = new JButton("AI Race");
+        JButton soloRace = new JButton("Solo Race");
+        JButton twoRacers = new JButton("Two Racers");
+        JButton threeRacers = new JButton("Three Racers");
+        JButton fourRacers = new JButton("Four Racers");
+        JButton backToDraw = new JButton("Back to Draw");
+
+        raceSetupButtons = new ArrayList<JButton>();
+        raceSetupButtons.add(aiRace);
+        raceSetupButtons.add(soloRace);
+        raceSetupButtons.add(twoRacers);
+        raceSetupButtons.add(threeRacers);
+        raceSetupButtons.add(fourRacers);
+        raceSetupButtons.add(backToDraw);
+
+        aiRace.addActionListener(new RaceButtonListener(this, 0)); // calls runSolver
+        soloRace.addActionListener(new RaceButtonListener(this, 1)); // rest call raceStart
+        twoRacers.addActionListener(new RaceButtonListener(this, 2));
+        threeRacers.addActionListener(new RaceButtonListener(this, 3));
+        fourRacers.addActionListener(new RaceButtonListener(this, 4));
+        backToDraw.addActionListener(new BackToDrawButtonListener(this));
+
+        buttonPanel.add(aiRace);
+        buttonPanel.add(soloRace);
+        buttonPanel.add(twoRacers);
+        buttonPanel.add(threeRacers);
+        buttonPanel.add(fourRacers);
+        buttonPanel.add(backToDraw);
+        return buttonPanel;
+    }
+
+    // sets up side pane for race info
+    public void setupRace(int racers) {
         race = new Race(courseDisplay.getCourse(), racers);
         courseDisplay.setRace(race);
+
         window.getContentPane().remove(3);
 
         JPanel raceInfo = new JPanel();
+        raceInfo.setPreferredSize(infoPanelDim);
         BoxLayout layout = new BoxLayout(raceInfo, BoxLayout.Y_AXIS);
         raceInfo.setLayout(layout);
 
-        info = new JLabel(raceStatus());
-        JButton back = new JButton("Back to Setup");
+        String infoText = (racers > 0) ? raceStatus() : "<html>Click course<br>to start</html>";
+        info = new JTextPane();
+        info.setContentType("text/html");
+        info.setMinimumSize(infoLabelDim);
+        info.setOpaque(false);
+        info.setEditable(false);
+        info.setText(infoText);
+
+        back = new JButton("Back to Setup");
         back.addActionListener(new RunButtonListener(this));
+
         raceInfo.add(info);
         raceInfo.add(back);
 
         window.getContentPane().add(raceInfo, BorderLayout.WEST);
 
-        message.setText("Go!");
+        message.setText((racers > 0 ? "Go!": "Click course to start"));
 
-        race.nextCar();
-        courseDisplay.addMouseListener(new MouseRaceListener(courseDisplay, this));
+        if (racers > 0) {
+            raceStart();
+        } else {
+            window.getContentPane().addMouseListener(new runSolverMouseListener(this));
+        }
     }
 
+    // initialize a non-ai race
+    public void raceStart() {
+        race.nextCar();
+        courseDisplay.paintNow();
+        courseDisplay.addMouseListener(new MouseRaceListener(courseDisplay, this)); // calls raceUpdate
+    }
+
+    // after player makes a move, update the race accordingly
     public void raceUpdate() {
         info.setText(raceStatus());
         List<Car> cars = race.getCars();
@@ -152,69 +263,7 @@ public class UserInterface implements Runnable {
 
     }
 
-    private JPanel builderButtons() {
-        JPanel buttonPanel = new JPanel();
-        BoxLayout layout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
-        buttonPanel.setLayout(layout);
-
-        JToggleButton drawWalls = new JToggleButton("Draw Walls");
-        JToggleButton drawStart = new JToggleButton("Draw Start");
-        JToggleButton drawCheck = new JToggleButton("Draw CheckPoint");
-        JButton race = new JButton("Done");
-
-        buildButtons = new ArrayList<JToggleButton>();
-        buildButtons.add(drawWalls);
-        buildButtons.add(drawStart);
-        buildButtons.add(drawCheck);
-
-        drawWalls.addActionListener(new DrawWallButtonListener(this));
-        drawStart.addActionListener(new DrawStartButtonListener(this));
-        drawCheck.addActionListener(new DrawCheckButtonListener(this));
-        race.addActionListener(new RunButtonListener(this));
-
-        buttonPanel.add(drawWalls);
-        buttonPanel.add(drawStart);
-        buttonPanel.add(drawCheck);
-        buttonPanel.add(race);
-        return buttonPanel;
-    }
-
-    private JPanel raceSetupButtons() {
-        JPanel buttonPanel = new JPanel();
-        BoxLayout layout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
-        buttonPanel.setLayout(layout);
-
-        JButton aiRace = new JButton("AI Race");
-        JButton soloRace = new JButton("Solo Race");
-        JButton twoRacers = new JButton("Two Racers");
-        JButton threeRacers = new JButton("Three Racers");
-        JButton fourRacers = new JButton("Four Racers");
-        JButton backToDraw = new JButton("Back to Draw");
-
-        raceSetupButtons = new ArrayList<JButton>();
-        raceSetupButtons.add(aiRace);
-        raceSetupButtons.add(soloRace);
-        raceSetupButtons.add(twoRacers);
-        raceSetupButtons.add(threeRacers);
-        raceSetupButtons.add(fourRacers);
-        raceSetupButtons.add(backToDraw);
-
-        aiRace.addActionListener(new RaceButtonListener(this, 0));
-        soloRace.addActionListener(new RaceButtonListener(this, 1));
-        twoRacers.addActionListener(new RaceButtonListener(this, 2));
-        threeRacers.addActionListener(new RaceButtonListener(this, 3));
-        fourRacers.addActionListener(new RaceButtonListener(this, 4));
-        backToDraw.addActionListener(new BackToDrawButtonListener(this));
-
-        buttonPanel.add(aiRace);
-        buttonPanel.add(soloRace);
-        buttonPanel.add(twoRacers);
-        buttonPanel.add(threeRacers);
-        buttonPanel.add(fourRacers);
-        buttonPanel.add(backToDraw);
-        return buttonPanel;
-    }
-
+    // to display in race info pane
     public String raceStatus() {
         StringBuilder sb = new StringBuilder("<html><body>Turn: ");
         sb.append(race.getTurn());
@@ -244,74 +293,48 @@ public class UserInterface implements Runnable {
         return sb.toString();
     }
 
+    // runs AI course solver
     public void runSolver() {
-        race = new Race(courseDisplay.getCourse(), 0);
-        courseDisplay.setRace(race);
+        // remove the starting mouse listener
+        window.getContentPane().removeMouseListener(window.getContentPane().getMouseListeners()[0]);
+        back.setEnabled(false);
+        back.paintImmediately(back.getVisibleRect());
+        message.setText("Red: random recent run, Blue: fastest finish so far");
+        message.paintImmediately(message.getVisibleRect());
+        info.setText("Working...");
+        info.paintImmediately(info.getVisibleRect());
+
         CourseSolver solver = new CourseSolver(courseDisplay);
-        System.out.println(solver.report());
-    }
+        long runStartTime = solver.getRunStartTime();
+        long startTime = runStartTime;
 
-    public void runSimulation() {
-        SimulatedRace simRace = new SimulatedRace(courseDisplay.getCourse());
-        race = simRace.getRace();
-        courseDisplay.setRace(race);
-        courseDisplay.setSimMode(true);
-        race.setTurn(0);
+        while(solver.hasNext()) {
+            Car car = solver.nextCar();
+            long thisTime = System.currentTimeMillis();
+            // every few seconds, but most recent run on the screen
+            if (thisTime - startTime > 4000) {
+                startTime = thisTime;
+                if (courseDisplay.getRace().getCars().size() == 0) {
+                    courseDisplay.getRace().getCars().add(car);
+                } else {
+                    courseDisplay.getRace().getCars().set(0, car);
+                }
 
-        List<Car> finishers = simRace.finishers();
-
-        window.getContentPane().remove(3);
-
-        JPanel raceInfo = new JPanel();
-        BoxLayout layout = new BoxLayout(raceInfo, BoxLayout.Y_AXIS);
-        raceInfo.setLayout(layout);
-        String infoText;
-        if (finishers.isEmpty()) {
-            infoText = "Problem with course, no finishers";
-        } else {
-            infoText = "<html><body>Shortest possible run: \n" + finishers.get(0).getPath().size() + " turns</body></html>";
+                courseDisplay.paintNow();
+                info.setText(solver.report());
+                info.paintImmediately(info.getVisibleRect());
+                // also best finisher if there is one
+                if (solver.getBestCar() != null) {
+                    courseDisplay.getRace().setActiveCar(new Car(solver.getBestCar(), Color.BLUE));
+                }
+            }
         }
-        info = new JLabel(infoText);
-        JButton back = new JButton("Back to Setup");
-        back.addActionListener(new RunButtonListener(this));
-        raceInfo.add(info);
-        raceInfo.add(back);
-
-        window.getContentPane().add(raceInfo, BorderLayout.WEST);
-
-        message.setText("Go!");
-
-        if (finishers.isEmpty()) { return; }
-
-        replay:
-        for (int i = 0; i < finishers.get(finishers.size() - 1).getPath().size(); i++) {
-            race.setTurn(i);
-            courseDisplay.repaint();
-//            try {
-//                TimeUnit.SECONDS.sleep(1);
-//            } catch (InterruptedException e) {
-//                break replay;
-//            }
+        info.setText(solver.report());
+        courseDisplay.getRace().getCars().clear();
+        if (solver.getBestCar() != null) {
+            courseDisplay.getRace().setActiveCar(new Car(solver.getBestCar(), Color.BLUE));
+            courseDisplay.paintNow();
         }
-    }
-
-    public JFrame getWindow() {
-        return window;
-    }
-
-    public int getScale() {
-        return scale;
-    }
-
-    public CourseDisplay getCourseDisplay() {
-        return courseDisplay;
-    }
-
-    public List<JToggleButton> getBuildButtons() {
-        return buildButtons;
-    }
-
-    public JLabel getMessage() {
-        return message;
+        back.setEnabled(true);
     }
 }
