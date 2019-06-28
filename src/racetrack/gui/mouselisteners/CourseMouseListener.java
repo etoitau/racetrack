@@ -25,6 +25,9 @@ import racetrack.gui.CourseDisplay;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * Basis for several mouse listeners that need to pick points on the course
+ */
 public class CourseMouseListener extends MouseAdapter {
     protected CourseDisplay coursePanel;
     protected int x, y;
@@ -33,11 +36,11 @@ public class CourseMouseListener extends MouseAdapter {
         this.coursePanel = coursePanel;
     }
 
+    // converts mouse coordinates into game grid coordinates
     @Override
     public void mousePressed(MouseEvent e) {
         x = (int) Math.round(1.0 * e.getX() / coursePanel.getScale());
         y = (int) Math.round(1.0 * e.getY() / coursePanel.getScale());
-
     }
 
 }

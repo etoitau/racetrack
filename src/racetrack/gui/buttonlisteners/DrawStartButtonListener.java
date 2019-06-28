@@ -26,6 +26,9 @@ import racetrack.gui.UserInterface;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+/**
+ * prepare ui to receive input about starting line from user via mouse
+ */
 public class DrawStartButtonListener extends DrawButtonListener {
 
     public DrawStartButtonListener(UserInterface ui) {

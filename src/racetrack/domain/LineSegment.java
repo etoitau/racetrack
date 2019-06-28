@@ -12,19 +12,14 @@ package racetrack.domain;
 
 import java.util.Objects;
 
+/**
+ * Two points forming a line segment
+ * a car's path is a list of these. walls are line segments. also the starting line and checkpoint
+ */
 public class LineSegment {
     private Point start, end;
 
-    public LineSegment(Point start, Point end) {
-        this.start = start;
-        this.end = end;
-    }
-
-    public LineSegment(LineSegment toCopy) {
-        this.start = new Point(toCopy.getStart());
-        this.end = new Point(toCopy.getEnd());
-    }
-
+    // getters / setters
     public Point getStart() {
         return start;
     }
@@ -39,6 +34,18 @@ public class LineSegment {
 
     public void setEnd(Point end) {
         this.end = end;
+    }
+
+    // constructor
+    public LineSegment(Point start, Point end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    // get copy
+    public LineSegment(LineSegment toCopy) {
+        this.start = new Point(toCopy.getStart());
+        this.end = new Point(toCopy.getEnd());
     }
 
     // do two line segments intersect?
@@ -61,10 +68,14 @@ public class LineSegment {
         return (check1 * check2 < 1) && (check3 * check4 < 1);
     }
 
+    /**
+     *
+     * www.cs.cmu.edu/~quake/robust.html
+     * note sign is flipped due to y axis pointing down
+     * returns Negative int if a, b, and c are in ccw arrangement, Positive if clockwise, 0 if colinear
+     */
     private static int orient(Point a, Point b, Point c) {
-        // www.cs.cmu.edu/~quake/robust.html
-        // note sign is flipped due to y axis pointing down
-        // returns Negative int if a, b, and c are in ccw arrangement, Positive if clockwise, 0 if colinear
+
         return (a.getX() - c.getX()) * (b.getY() - c.getY()) - (b.getX() - c.getX()) * (a.getY() - c.getY());
     }
 

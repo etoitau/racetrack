@@ -26,10 +26,12 @@ import racetrack.gui.CourseDisplay;
 
 import java.awt.event.MouseEvent;
 
+/**
+ * for drawing starting line
+ */
 public class MouseDrawStartListener extends CourseMouseListener {
     private int x1, y1, x2, y2;
     private boolean secondClick = false;
-
 
     public MouseDrawStartListener(CourseDisplay coursePanel) {
         super(coursePanel);
@@ -49,8 +51,8 @@ public class MouseDrawStartListener extends CourseMouseListener {
             y2 = y;
             secondClick = false;
 
-            LineSegment wall = new LineSegment(new Point(x1, y1), new Point(x2, y2));
-            coursePanel.getCourse().setStartLine(wall);
+            LineSegment startLine = new LineSegment(new Point(x1, y1), new Point(x2, y2));
+            coursePanel.getCourse().setStartLine(startLine);
 
             coursePanel.repaint();
         }

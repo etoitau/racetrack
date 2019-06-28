@@ -10,30 +10,17 @@
 
 package racetrack;
 
-
-import racetrack.domain.LineSegment;
-import racetrack.domain.Point;
 import racetrack.gui.UserInterface;
 
 import javax.swing.*;
 
+/**
+ * Racetrack
+ * a Java implementation of the classic pen and paper game
+ * I learned about it here: http://www.papg.com/show?1TPE
+ */
 public class Main {
     public static void main(String[] args) {
-        // test intersection
-//        Point aStart = new Point(1, 1);
-//        Point aEnd = new Point(1, 1);
-//        LineSegment a = new LineSegment(aStart, aEnd);
-//
-//        Point bStart = new Point(0, 0);
-//        Point bEnd = new Point(0, 10);
-//        LineSegment b = new LineSegment(bStart, bEnd);
-//
-//        System.out.println(a.crosses(b));
-
-        // test move
-//        Point start = new Point(0,0);
-//        Point end = new Point(start);
-//        LineSegment vector = new LineSegment(start, end);
         // run gui
         SwingUtilities.invokeLater(new UserInterface());
     }

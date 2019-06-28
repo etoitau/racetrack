@@ -12,12 +12,11 @@ package racetrack.gui;
 
 import racetrack.domain.Car;
 import racetrack.game.Course;
-import racetrack.game.CourseSolver;
 import racetrack.game.Race;
 import racetrack.gui.buttonlisteners.*;
-import racetrack.gui.keylisteners.SolverKeyListener;
 import racetrack.gui.mouselisteners.MouseRaceListener;
 import racetrack.gui.mouselisteners.runSolverMouseListener;
+import racetrack.gui.swingworkers.SolverWorker;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,19 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserInterface implements Runnable {
-
+    // ui components
     private JFrame window;
-    private int scale = 25, length = 10, height = 8;
     private CourseDisplay courseDisplay;
     private List<JToggleButton> buildButtons;
     private List<JButton> raceSetupButtons;
     private JLabel message;
-    private JTextPane info;
-    private Race race;
     private JButton back;
+    private JTextPane info;
+    // ai solver
+    private Race race;
+    private SolverWorker worker;
+    private boolean firstRun = true;
+    // configuration
+    private int scale = 25, length = 10, height = 8;
     private Dimension infoPanelDim = new Dimension(200, height * scale),
                 infoLabelDim = new Dimension(180, height * scale - 30);
 
+    // getters and setters
     public CourseDisplay getCourseDisplay() {
         return courseDisplay;
     }
@@ -51,6 +55,15 @@ public class UserInterface implements Runnable {
         return message;
     }
 
+    public JButton getBack() {
+        return back;
+    }
+
+    public JTextPane getInfo() {
+        return info;
+    }
+
+    // methods
     @Override
     public void run() {
         window = new JFrame("Racetrack");
@@ -103,7 +116,7 @@ public class UserInterface implements Runnable {
         JToggleButton drawCheck = new JToggleButton("Draw CheckPoint");
         JButton race = new JButton("Done");
 
-        buildButtons = new ArrayList<JToggleButton>();
+        buildButtons = new ArrayList<>();
         buildButtons.add(drawWalls);
         buildButtons.add(drawStart);
         buildButtons.add(drawCheck);
@@ -120,13 +133,22 @@ public class UserInterface implements Runnable {
         return buttonPanel;
     }
 
-    // set up race configuration pane
+    // set up race configuration pane / reset for new race
     public void raceSetup() {
+        removeMouseListeners();
         window.getContentPane().remove(3);
         window.getContentPane().add(raceSetupButtons(), BorderLayout.WEST);
         message.setText("Choose racing mode");
         courseDisplay.setRace(null);
         courseDisplay.paintNow();
+    }
+
+    // clean up any drawing or ai control mouse listeners
+    private void removeMouseListeners() {
+        for (MouseListener listener : window.getContentPane().getMouseListeners())
+            window.getContentPane().removeMouseListener(listener);
+        for (MouseListener listener : courseDisplay.getMouseListeners())
+            window.getContentPane().removeMouseListener(listener);
     }
 
     // make panel with race configuration buttons
@@ -136,7 +158,7 @@ public class UserInterface implements Runnable {
         buttonPanel.setLayout(layout);
         buttonPanel.setPreferredSize(infoPanelDim);
 
-        JButton aiRace = new JButton("AI Race");
+        JButton aiRace = new JButton("AI Solver");
         JButton soloRace = new JButton("Solo Race");
         JButton twoRacers = new JButton("Two Racers");
         JButton threeRacers = new JButton("Three Racers");
@@ -167,7 +189,7 @@ public class UserInterface implements Runnable {
         return buttonPanel;
     }
 
-    // sets up side pane for race info
+    // sets up for AI or player race
     public void setupRace(int racers) {
         race = new Race(courseDisplay.getCourse(), racers);
         courseDisplay.setRace(race);
@@ -197,10 +219,13 @@ public class UserInterface implements Runnable {
 
         message.setText((racers > 0 ? "Go!": "Click course to start"));
 
+        // if player or AI race
         if (racers > 0) {
             raceStart();
         } else {
+            // calls runSolver with each click
             window.getContentPane().addMouseListener(new runSolverMouseListener(this));
+            firstRun = true;
         }
     }
 
@@ -293,48 +318,22 @@ public class UserInterface implements Runnable {
         return sb.toString();
     }
 
-    // runs AI course solver
+    // starts, pauses, or unpauses AI course solver
     public void runSolver() {
-        // remove the starting mouse listener
-        window.getContentPane().removeMouseListener(window.getContentPane().getMouseListeners()[0]);
-        back.setEnabled(false);
-        back.paintImmediately(back.getVisibleRect());
-        message.setText("Red: random recent run, Blue: fastest finish so far");
-        message.paintImmediately(message.getVisibleRect());
-        info.setText("Working...");
-        info.paintImmediately(info.getVisibleRect());
-
-        CourseSolver solver = new CourseSolver(courseDisplay);
-        long runStartTime = solver.getRunStartTime();
-        long startTime = runStartTime;
-
-        while(solver.hasNext()) {
-            Car car = solver.nextCar();
-            long thisTime = System.currentTimeMillis();
-            // every few seconds, but most recent run on the screen
-            if (thisTime - startTime > 4000) {
-                startTime = thisTime;
-                if (courseDisplay.getRace().getCars().size() == 0) {
-                    courseDisplay.getRace().getCars().add(car);
-                } else {
-                    courseDisplay.getRace().getCars().set(0, car);
-                }
-
-                courseDisplay.paintNow();
-                info.setText(solver.report());
-                info.paintImmediately(info.getVisibleRect());
-                // also best finisher if there is one
-                if (solver.getBestCar() != null) {
-                    courseDisplay.getRace().setActiveCar(new Car(solver.getBestCar(), Color.BLUE));
-                }
-            }
+        if (firstRun) {
+            firstRun = false;
+            back.setEnabled(false);
+            back.paintImmediately(back.getVisibleRect());
+            worker = new SolverWorker(this);
+            worker.execute();
+        } else if (!worker.isPaused()) {
+            worker.pause();
+            back.setEnabled(true);
+            back.paintImmediately(back.getVisibleRect());
+        } else {
+            back.setEnabled(false);
+            back.paintImmediately(back.getVisibleRect());
+            worker.resume();
         }
-        info.setText(solver.report());
-        courseDisplay.getRace().getCars().clear();
-        if (solver.getBestCar() != null) {
-            courseDisplay.getRace().setActiveCar(new Car(solver.getBestCar(), Color.BLUE));
-            courseDisplay.paintNow();
-        }
-        back.setEnabled(true);
     }
 }

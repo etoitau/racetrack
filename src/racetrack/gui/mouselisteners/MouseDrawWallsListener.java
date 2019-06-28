@@ -26,6 +26,9 @@ import racetrack.gui.CourseDisplay;
 
 import java.awt.event.MouseEvent;
 
+/**
+ * for drawing walls
+ */
 public class MouseDrawWallsListener extends CourseMouseListener {
     private int x1, y1, x2, y2;
     private boolean secondClick = false;

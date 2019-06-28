@@ -14,10 +14,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * an object for exploring all possible race paths
+ * uses a trie structure to store each path that is attempted
+ * when the possibilities of a path are exhausted that path is set null
+ */
 public class StepExplorer {
-    private StepNode head;
-    private List<Short> current;
+    private StepNode head; // head of the trie structure
+    private List<Short> current; // list of the steps of this run so far
 
+    // constructor
     public StepExplorer(short startBias) {
         head = new StepNode();
         // first move should never be to stay put
@@ -25,6 +31,10 @@ public class StepExplorer {
         current = new ArrayList<>();
     }
 
+    /**
+     * navigates trie to current position and get's next step if available
+     * if none are available (getNext returns -1) that path is set null
+      */
     public Short getNextStep() {
         short next;
         next = this.getCurrentLeaf().getNext();
@@ -41,6 +51,7 @@ public class StepExplorer {
         return next;
     }
 
+    // sets current leaf to null, indicating all paths that way have been explored
     public void killCurrent() {
         if (current.size() > 0) {
             this.getCurrentLeaf().killNode(current.get(current.size() - 1));
@@ -49,37 +60,27 @@ public class StepExplorer {
         }
     }
 
+    // resets list of steps and gets first
     public Short getFirstStep() {
         current = new ArrayList<Short>();
         return this.getNextStep();
     }
 
-    private StepNode getParentOfCurrent() {
-        StepNode temp = head;
-        for (short i = 0; i < current.size() - 1; i++) {
-            HashMap<Short, StepNode> kids = temp.getChildren();
-            temp = kids.get(current.get(i));
-        }
-        return temp;
-    }
-
+    // navigates structure to leaf representing last move
     private StepNode getCurrentLeaf() {
-        StepNode temp = head;
+        StepNode leaf = head;
         for (short i = 0; i < current.size(); i++) {
-            HashMap<Short, StepNode> kids = temp.getChildren();
-            temp = kids.get(current.get(i));
+            HashMap<Short, StepNode> kids = leaf.getChildren();
+            leaf = kids.get(current.get(i));
         }
-        return temp;
+        return leaf;
     }
 
+    // if all paths have been tried, head will have been set null
     public boolean hasNext() {
         if (head == null) {
             return false;
         }
         return true;
     }
-
-
-
-
 }

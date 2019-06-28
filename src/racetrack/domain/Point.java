@@ -14,57 +14,53 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * a point object has an x and y coordinate
+ * line segments use points
+ * can also represent a vector with respect to origin
+ */
 public class Point {
     protected int x, y;
 
-    public Point(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public Point(Point toCopy) {
-        this.x = toCopy.getX();
-        this.y = toCopy.getY();
-    }
-
+    // getters
     public int getX() {
         return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
     }
 
     public int getY() {
         return y;
     }
 
-    public void setY(int y) {
+    // constructor
+    public Point(int x, int y) {
+        this.x = x;
         this.y = y;
     }
 
+    // get copy
+    public Point(Point toCopy) {
+        this.x = toCopy.getX();
+        this.y = toCopy.getY();
+    }
+
+    // vector addition of points
     public void add(Point point) {
         this.x += point.getX();
         this.y += point.getY();
     }
 
+    // vector subtraction of points
     public void subtract(Point point) {
         this.x -= point.getX();
         this.y -= point.getY();
     }
 
-
-    public void reset(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-
-
+    // get manhattan distance from origin
     public int manhattanLength() {
         return x + y;
     }
 
+    // return all adjacent points
     public List<Point> adjacents() {
         ArrayList<Point> points = new ArrayList<Point>(8);
         for (int i = -1; i < 2; i++) {

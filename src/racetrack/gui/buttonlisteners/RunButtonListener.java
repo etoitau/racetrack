@@ -11,11 +11,12 @@
 package racetrack.gui.buttonlisteners;
 
 import racetrack.gui.UserInterface;
-import racetrack.gui.mouselisteners.MouseDrawWallsListener;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+/**
+ * When user is done drawing and can proceed to race setup
+ */
 public class RunButtonListener extends DrawButtonListener {
 
     public RunButtonListener(UserInterface ui) {

@@ -19,33 +19,37 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * runs a trial AI car and get's outcome
+ */
 public class Solution {
     private CourseSolver solver;
+    private int bias;
 
+    // constructor
     public Solution(CourseSolver solver) {
         this.solver = solver;
+        this.bias = solver.getStartBias();
     }
 
+    // run car and manage outcome
     public Car runCar() {
         // initialize car for run
         List<Short> steps = new ArrayList<>();
         Car car = new Car(new LineSegment(solver.getInit()), solver.getCourse(), Color.RED);
         StepExplorer explorer = solver.getExplorer();
 
+        // use explorer to get first step
         short step = explorer.getFirstStep();
         if (step < 0) {
             return car;
         }
         steps.add(step);
 
-        runCar:
+        // keep getting next step and moving car until crashes, finishes, or runs out of moves
         while (true) {
-            short bias = solver.getStdBias();
-            if (steps.size() == 1) {
-                bias = solver.getStartBias();
-            }
-            // execute step
-            Point dest = car.getVector().getEnd().adjacents().get( (step + bias) % 9);
+            // get and execute step
+            Point dest = car.getVector().getEnd().adjacents().get((step + bias) % 9);
             car.move(dest);
 
             // check outcome of move
@@ -56,11 +60,13 @@ public class Solution {
                 return car;
             // if just passed checkpoint
             } else if (outcome == 2) {
+                // if best time to checkpoint, update
                 if (steps.size() < solver.getMinToCheck()) {
                     solver.setMinToCheck(steps.size());
                 }
             // if just passed finish
             } else if (outcome == 3) {
+                // if best time to finish, update
                 if (steps.size() < solver.getMinToFinish()) {
                     solver.setMinToFinish(steps.size());
                     solver.setBestCar(car);
@@ -68,7 +74,7 @@ public class Solution {
                 explorer.killCurrent();
                 return car;
             }
-            // get next step
+            // get next step, if no step - return
             step = explorer.getNextStep();
             if (step < 0) {
                 return car;
@@ -78,19 +84,22 @@ public class Solution {
         }
     }
 
+    /**
+     * check latest move and return int indicating outcome
+     * 0 - no good
+     * 1 - nothing to report
+     * 2 - just passed checkpoint
+     * 3 - just passed finish line
+     */
     private int checkMove(Car car, List<Short> steps) {
-        // return:
-        // 0 - no good
-        // 1 - nothing to report
-        // 2 - just passed checkpoint
-        // 3 - just passed finish line
         LineSegment lastMove = car.getLastMove();
+        // assume cruising unless we find otherwise
         int outcome = 1;
         // check for crash
         if (car.hitsWall(lastMove)) {
             return 0;
         }
-        // check past checkpoint
+        // check just passed checkpoint
         if (lastMove.gateCross(solver.getCourse().getCheckPoint())) {
             car.setIsPastCheckpoint(true);
             outcome = 2;
@@ -107,7 +116,7 @@ public class Solution {
                 return 0;
             }
         }
-        // check for time to finish
+        // check for too slow to finish
         if (steps.size() > solver.getMinToFinish()) {
             return 0;
         }
@@ -124,7 +133,4 @@ public class Solution {
         }
         return outcome;
     }
-
-
-
 }

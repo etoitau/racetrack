@@ -14,8 +14,10 @@ import racetrack.gui.UserInterface;
 
 import java.awt.event.ActionEvent;
 
+/**
+ * when user chooses race option and race can start
+ */
 public class RaceButtonListener extends DrawButtonListener {
-
     private int numberOfRacers;
 
     public RaceButtonListener(UserInterface ui, int numberOfRacers) {

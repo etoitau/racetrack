@@ -15,6 +15,9 @@ import racetrack.gui.UserInterface;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * start or pause ai solver
+ */
 public class runSolverMouseListener extends MouseAdapter {
     protected UserInterface ui;
 

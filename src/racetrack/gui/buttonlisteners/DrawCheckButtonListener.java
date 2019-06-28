@@ -26,6 +26,9 @@ import racetrack.gui.UserInterface;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+/**
+ * prepare ui to receive input about checkpoint line from user via mouse
+ */
 public class DrawCheckButtonListener extends DrawButtonListener {
 
     public DrawCheckButtonListener(UserInterface ui) {

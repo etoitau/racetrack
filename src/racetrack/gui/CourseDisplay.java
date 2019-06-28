@@ -12,7 +12,6 @@ package racetrack.gui;
 
 import racetrack.domain.Car;
 import racetrack.domain.LineSegment;
-import racetrack.domain.Point;
 import racetrack.game.Course;
 import racetrack.game.Race;
 
@@ -20,14 +19,36 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * object manages graphical display of a Course object. Part of the gui
+ */
 public class CourseDisplay extends JPanel {
     private Course course;
     private Race race;
     private int scale;
-    private boolean simMode = false;
     private final int DOT = 2, WALL_DOT = 4, TYP_CAR_DOT = 8, ACTIVE_CAR_DOT = 10;
-    private final Color WALL_COLOR = Color.BLACK, START_COLOR = new Color(50, 160, 30), CHECK_COLOR = Color.BLUE;
+    private final Color WALL_COLOR = Color.BLACK,
+            GRID_LINES = Color.LIGHT_GRAY,
+            START_COLOR = new Color(50, 160, 30),
+            CHECK_COLOR = Color.BLUE;
 
+    public Course getCourse() {
+        return course;
+    }
+
+    public Race getRace() {
+        return race;
+    }
+
+    public void setRace(Race race) {
+        this.race = race;
+    }
+
+    public int getScale() {
+        return scale;
+    }
+
+    // constructor
     public CourseDisplay(Course course, int scale) {
         super.setBackground(Color.WHITE);
         this.course = course;
@@ -44,36 +65,14 @@ public class CourseDisplay extends JPanel {
         drawCars(g);
     }
 
+    // swing is too slow to update course graphics, calling this way gets faster response
     public void paintNow() {
         paintComponent(this.getGraphics());
     }
 
-    public int getScale() {
-        return scale;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public Race getRace() {
-        return race;
-    }
-
-    public void setRace(Race race) {
-        this.race = race;
-    }
-
-    public void setSimMode(boolean isSim) {
-        this.simMode = isSim;
-    }
-
-    public boolean isSimMode() {
-        return simMode;
-    }
-
+    // draw grid lines and dots at intersections
     private void drawGrid(Graphics g) {
-        g.setColor(Color.LIGHT_GRAY);
+        g.setColor(GRID_LINES);
         // draw vert grids
         for (int i = 0; i <= course.getLength() ; i++) {
             g.drawLine(i * scale, 0, i * scale, course.getHeight() * scale);
@@ -90,6 +89,7 @@ public class CourseDisplay extends JPanel {
         }
     }
 
+    // draw border and user-created walls
     private void drawWalls(Graphics g) {
         List<LineSegment> walls = course.getWalls();
         if (walls == null)
@@ -98,19 +98,24 @@ public class CourseDisplay extends JPanel {
         for (LineSegment wall: walls) {
             g.drawLine(wall.getStart().getX() * scale, wall.getStart().getY() * scale,
                     wall.getEnd().getX() * scale, wall.getEnd().getY() * scale);
-            g.fillOval(wall.getStart().getX() * scale - WALL_DOT / 2, wall.getStart().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
-            g.fillOval(wall.getEnd().getX() * scale - WALL_DOT / 2, wall.getEnd().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
+            g.fillOval(wall.getStart().getX() * scale - WALL_DOT / 2,
+                    wall.getStart().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
+            g.fillOval(wall.getEnd().getX() * scale - WALL_DOT / 2,
+                    wall.getEnd().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
         }
     }
 
+    // draw starting line and checkpoint lines. Note these have direction indicated by arrows, dealt with in drawArrows
     private void drawStartAndCheck(Graphics g) {
         g.setColor(START_COLOR);
         LineSegment startLine = course.getStartLine();
         if (startLine != null) {
             g.drawLine(startLine.getStart().getX() * scale, startLine.getStart().getY() * scale,
                     startLine.getEnd().getX() * scale, startLine.getEnd().getY() * scale);
-            g.fillOval(startLine.getStart().getX() * scale - WALL_DOT / 2, startLine.getStart().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
-            g.fillOval(startLine.getEnd().getX() * scale - WALL_DOT / 2, startLine.getEnd().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
+            g.fillOval(startLine.getStart().getX() * scale - WALL_DOT / 2,
+                    startLine.getStart().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
+            g.fillOval(startLine.getEnd().getX() * scale - WALL_DOT / 2,
+                    startLine.getEnd().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
             drawArrows(startLine, g);
         }
 
@@ -119,21 +124,23 @@ public class CourseDisplay extends JPanel {
         if (checkPoint != null) {
             g.drawLine(checkPoint.getStart().getX() * scale, checkPoint.getStart().getY() * scale,
                     checkPoint.getEnd().getX() * scale, checkPoint.getEnd().getY() * scale);
-            g.fillOval(checkPoint.getStart().getX() * scale - WALL_DOT / 2, checkPoint.getStart().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
-            g.fillOval(checkPoint.getEnd().getX() * scale - WALL_DOT / 2, checkPoint.getEnd().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
+            g.fillOval(checkPoint.getStart().getX() * scale - WALL_DOT / 2,
+                    checkPoint.getStart().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
+            g.fillOval(checkPoint.getEnd().getX() * scale - WALL_DOT / 2,
+                    checkPoint.getEnd().getY() * scale - WALL_DOT / 2, WALL_DOT, WALL_DOT);
             drawArrows(checkPoint, g);
         }
     }
 
+    // arrows at each end of line which indicate it's orientation
     private void drawArrows(LineSegment line, Graphics g) {
-        // model arrow with return to left
+        // model arrow with return leg to left
         double tipX = 0, tipY = -1 * scale;
         double retX = -1 * scale / 4, retY = tipY * 2/3;
 
-        // info about this line
+        // info about this starting or checkpoint line
         int dx = (line.getEnd().getX() - line.getStart().getX()) * scale;
         int dy = (line.getEnd().getY() - line.getStart().getY()) * scale;
-        double length = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
         double theta = Math.atan(1.0 * dy / dx);
         if (dx < 0)
             theta += Math.PI;
@@ -145,8 +152,6 @@ public class CourseDisplay extends JPanel {
         int retYPrimeLeft = (int) Math.round(retY * Math.cos(theta) + retX * Math.sin(theta));
         int retXPrimeRight = (int) Math.round(-1 * retX * Math.cos(theta) - retY * Math.sin(theta));
         int retYPrimeRight = (int) Math.round(retY * Math.cos(theta) - retX * Math.sin(theta));
-
-        int tipYPrimeRight = (int) Math.round(tipY * Math.cos(theta) - tipX * Math.sin(theta));
 
         // draw arrows
         // left side
@@ -165,21 +170,19 @@ public class CourseDisplay extends JPanel {
                 line.getEnd().getX() * scale + retXPrimeLeft, line.getEnd().getY() * scale + retYPrimeLeft);
     }
 
+    // draw all the cars using car's draw method
     public void drawCars(Graphics g) {
         if (race == null) { return; }
         if(race.getCars() == null) { return; }
         // draw all the cars (with paths)
         for (Car car : race.getCars()) {
-            if(simMode) {
-                car.draw(g, scale, race.getTurn());
-            } else {
-                car.draw(g, scale, TYP_CAR_DOT);
-            }
+            car.draw(g, scale, TYP_CAR_DOT);
         }
     }
 
+    // draw the car who's turn it is (or best run if ai solver)
     private void drawActiveCar(Graphics g) {
-        if (race == null || simMode) { return; }
+        if (race == null) { return; }
         Car car = race.getActiveCar();
         if(car == null)
             return;

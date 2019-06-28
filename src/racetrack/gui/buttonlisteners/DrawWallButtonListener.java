@@ -26,6 +26,9 @@ import racetrack.gui.UserInterface;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+/**
+ * prepare ui to receive input about walls from user via mouse
+ */
 public class DrawWallButtonListener extends DrawButtonListener {
 
     public DrawWallButtonListener(UserInterface ui) {

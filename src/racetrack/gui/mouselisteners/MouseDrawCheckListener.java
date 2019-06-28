@@ -26,6 +26,9 @@ import racetrack.gui.CourseDisplay;
 
 import java.awt.event.MouseEvent;
 
+/**
+ * for drawing checkpoint
+ */
 public class MouseDrawCheckListener extends CourseMouseListener {
     private int x1, y1, x2, y2;
     private boolean secondClick = false;
@@ -48,8 +51,8 @@ public class MouseDrawCheckListener extends CourseMouseListener {
             y2 = y;
             secondClick = false;
 
-            LineSegment wall = new LineSegment(new Point(x1, y1), new Point(x2, y2));
-            coursePanel.getCourse().setCheckPoint(wall);
+            LineSegment checkLine = new LineSegment(new Point(x1, y1), new Point(x2, y2));
+            coursePanel.getCourse().setCheckPoint(checkLine);
 
             coursePanel.repaint();
         }

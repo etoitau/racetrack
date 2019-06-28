@@ -31,19 +31,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * Manager for ai solution
+ * keeps track of persistent solution data and serves as interface for ui
+ */
 public class CourseSolver {
-
-
     private Course course;
-    private CourseDisplay courseDisplay;
-    private int maxTurns, minToCheck = Integer.MAX_VALUE, minToFinish = Integer.MAX_VALUE, checkPointGrace = 3;
-    private Car bestCar;
-    private StepExplorer explorer;
-    private long runs = 0, runStartTime;
     private LineSegment start;
     private LineSegment init;
-    private short startBias, stdBias;
 
+    private StepExplorer explorer;
+    private int maxTurns, minToCheck = Integer.MAX_VALUE, minToFinish = Integer.MAX_VALUE, checkPointGrace = 3;
+    private Car bestCar;
+    private long runs = 0, runStartTime;
+    private short startBias;
+
+    // getters / setters
     public LineSegment getStart() {
         return start;
     }
@@ -96,47 +99,48 @@ public class CourseSolver {
         return startBias;
     }
 
-    public short getStdBias() {
-        return stdBias;
-    }
-
     public long getRunStartTime() {
         return runStartTime;
     }
 
+    // constructor
     public CourseSolver(CourseDisplay cd) {
         this.course = cd.getCourse();
-        this.courseDisplay = cd;
         this.maxTurns = maxPath();
         this.start = course.getStartLine();
         this.init = initialVector();
         this.runStartTime = System.currentTimeMillis();
-        this.startBias = findStartDirection();
-        this.stdBias = 4; // which direction to try first, typically
+        this.startBias = findStartDirection(); // try this starting move first
         this.explorer = new StepExplorer(startBias);
     }
 
+    // car's initial vector
     private LineSegment initialVector() {
         int startX = (start.getStart().getX() + start.getEnd().getX()) / 2;
         int startY = (start.getStart().getY() + start.getEnd().getY()) / 2;
         return new LineSegment(new Point(startX, startY), new Point(startX, startY));
     }
 
+    // check if explorer has another path to try
     public boolean hasNext() {
         return explorer.hasNext();
     }
 
+    // use Solution to run a car and return it
     public Car nextCar() {
         runs++;
         Solution solution = new Solution(this);
         return solution.runCar();
     }
 
+    // what is the max possible optimum solution length? If run is going longer it can be stopped
     private int maxPath() {
-        // assuming you move forward one space each turn and walls are laid out for maximum path
-        return 2 * (course.getLength() - 2) + 2 * (course.getHeight() - 2) + (course.getLength() - 4) / 2 * (course.getHeight() - 4);
+        // assuming you move forward one space each turn and walls are laid out for maximum path:
+        // labyrinth from one corner to other then backtrack
+        return 2 * (course.getLength() - 2 + (course.getHeight() - 2) * course.getLength() / 2);
     }
 
+    // get html report of solution progress
     public String report() {
         if (runs == 0) {
             return "Not run yet";
@@ -161,6 +165,13 @@ public class CourseSolver {
         return sb.toString();
     }
 
+    /**
+     * for most courses, the best first move will be to move away from starting line in direction it points
+     * point option indexes correspond to directions as follows:
+     * 0 3 6
+     * 1 4 7
+     * 2 5 8
+     */
     private short findStartDirection() {
         short choice;
         LineSegment startLine = course.getStartLine();
@@ -181,6 +192,7 @@ public class CourseSolver {
             } else {
                 choice = 1;
             }
+        // if diagonal
         } else if (dx > 0) {
             if (dy > 0) {
                 choice = 6;
@@ -196,5 +208,4 @@ public class CourseSolver {
         }
         return choice;
     }
-
 }

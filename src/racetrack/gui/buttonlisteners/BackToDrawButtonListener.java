@@ -14,6 +14,7 @@ import racetrack.gui.UserInterface;
 
 import java.awt.event.ActionEvent;
 
+// button to take you back to drawing menu
 public class BackToDrawButtonListener extends DrawButtonListener {
     public BackToDrawButtonListener(UserInterface ui) {
         super(ui);
@@ -23,7 +24,7 @@ public class BackToDrawButtonListener extends DrawButtonListener {
     public void actionPerformed(ActionEvent e) {
         super.clearMouseListeners();
 
-        // get draw buttons
+        // setup for drawing
         ui.drawSetup();
     }
 }

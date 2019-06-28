@@ -10,7 +10,6 @@
 
 package racetrack.gui.mouselisteners;
 
-import racetrack.domain.Car;
 import racetrack.domain.Point;
 import racetrack.game.Race;
 import racetrack.gui.CourseDisplay;
@@ -19,14 +18,18 @@ import racetrack.gui.UserInterface;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+/**
+ * during race, picking which move the user wants
+ */
 public class MouseRaceListener extends CourseMouseListener {
-    UserInterface ui;
+    private UserInterface ui;
 
     public MouseRaceListener(CourseDisplay coursePanel, UserInterface ui) {
         super(coursePanel);
         this.ui = ui;
     }
 
+    // if they clicked on an available option, update the race with their selection
     @Override
     public void mousePressed(MouseEvent e) {
         super.mousePressed(e);
@@ -38,6 +41,7 @@ public class MouseRaceListener extends CourseMouseListener {
         }
     }
 
+    // check if click corresponds with an available option
     private boolean validOption() {
         List<Point> options = coursePanel.getRace().getActiveCar().options();
         for (Point point: options) {

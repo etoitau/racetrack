@@ -13,27 +13,40 @@ package racetrack.domain;
 import java.util.HashMap;
 import java.util.Random;
 
+/**
+ * Node (or leaf) of trie structure that keeps track of all paths attempted so far
+ */
 public class StepNode {
     private HashMap<Short,StepNode> children;
     private StepNode parent;
     private Random rand;
 
+    public HashMap<Short,StepNode> getChildren() {
+        return children;
+    }
+
+    // constructor
     public StepNode() {
-        children = new HashMap<Short, StepNode>();
+        children = new HashMap<>();
         rand = new Random();
     }
 
+    // constructor for typical leaf except head
     public StepNode(StepNode parent) {
         this();
         this.parent = parent;
     }
 
+    // returns a new step from the current leaf. If all have been taken, report -1 so StepExplorer can set null
     public Short getNext() {
         // if we've already killed this node
         if (children == null)
             return -1;
+
+        // if first move, start with zero so Solution can apply startBias, otherwise random
+        int shuffle = (parent == null) ? 0 : rand.nextInt(9);
+
         // try possible next moves 0-8
-        int shuffle = rand.nextInt(9);
         for (int i = 0; i < 9; i++) {
             short index = (short) ((i + shuffle) % 9);
             // if we've tried this option before
@@ -58,10 +71,4 @@ public class StepNode {
     public void killNode(short i) {
         parent.getChildren().put(i, null);
     }
-
-    public HashMap<Short,StepNode> getChildren() {
-        return children;
-    }
-
-
 }
