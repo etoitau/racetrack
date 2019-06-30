@@ -40,7 +40,9 @@ public class UserInterface implements Runnable {
     // configuration
     private int scale = 25, length = 10, height = 8;
     private Dimension infoPanelDim = new Dimension(200, height * scale),
-                infoLabelDim = new Dimension(180, height * scale - 30);
+                infoLabelDim = new Dimension(180, height * scale - 40);
+    private final Dimension BUTTON_DIM = new Dimension( 180, 30);
+    private final int FONT_SIZE = 14;
 
     // getters and setters
     public CourseDisplay getCourseDisplay() {
@@ -83,13 +85,13 @@ public class UserInterface implements Runnable {
         Course course = new Course(length, height);
         courseDisplay = new CourseDisplay(course, scale);
         courseDisplay.setPreferredSize(new Dimension(length * scale, height * scale));
-        container.add(courseDisplay, BorderLayout.CENTER);
 
-        JLabel title = new JLabel("Racetrack");
-        container.add(title, BorderLayout.NORTH);
+        message = new JLabel(" ");
 
-        message = new JLabel("");
-        container.add(message, BorderLayout.SOUTH);
+        container.add(courseDisplay, BorderLayout.CENTER); // 1
+        container.add(new JLabel("<html>&nbsp</html>"), BorderLayout.NORTH); // 2
+        container.add(message, BorderLayout.SOUTH); // 3
+        container.add(new JLabel("<html>&nbsp</html>"), BorderLayout.EAST); // 4
 
         // at first, want drawing buttons
         drawSetup();
@@ -98,9 +100,9 @@ public class UserInterface implements Runnable {
     // set up drawing button pane
     public void drawSetup() {
         // set up drawing buttons
-        if (window.getContentPane().getComponentCount() == 4)
-            window.getContentPane().remove(3);
-        window.getContentPane().add(builderButtons(), BorderLayout.WEST);
+        if (window.getContentPane().getComponentCount() == 5)
+            window.getContentPane().remove(4);
+        window.getContentPane().add(builderButtons(), BorderLayout.WEST); // 5
         message.setText("Choose drawing option");
     }
 
@@ -114,7 +116,9 @@ public class UserInterface implements Runnable {
         JToggleButton drawWalls = new JToggleButton("Draw Walls");
         JToggleButton drawStart = new JToggleButton("Draw Start");
         JToggleButton drawCheck = new JToggleButton("Draw CheckPoint");
-        JButton race = new JButton("Done");
+        JButton drawDone = new JButton("Done");
+
+        formatButton(drawWalls, drawStart, drawCheck, drawDone);
 
         buildButtons = new ArrayList<>();
         buildButtons.add(drawWalls);
@@ -124,19 +128,19 @@ public class UserInterface implements Runnable {
         drawWalls.addActionListener(new DrawWallButtonListener(this));
         drawStart.addActionListener(new DrawStartButtonListener(this));
         drawCheck.addActionListener(new DrawCheckButtonListener(this));
-        race.addActionListener(new RunButtonListener(this)); // calls raceSetup if done drawing
+        drawDone.addActionListener(new RunButtonListener(this)); // calls raceSetup if done drawing
 
         buttonPanel.add(drawWalls);
         buttonPanel.add(drawStart);
         buttonPanel.add(drawCheck);
-        buttonPanel.add(race);
+        buttonPanel.add(drawDone);
         return buttonPanel;
     }
 
     // set up race configuration pane / reset for new race
     public void raceSetup() {
         removeMouseListeners();
-        window.getContentPane().remove(3);
+        window.getContentPane().remove(4);
         window.getContentPane().add(raceSetupButtons(), BorderLayout.WEST);
         message.setText("Choose racing mode");
         courseDisplay.setRace(null);
@@ -164,6 +168,8 @@ public class UserInterface implements Runnable {
         JButton threeRacers = new JButton("Three Racers");
         JButton fourRacers = new JButton("Four Racers");
         JButton backToDraw = new JButton("Back to Draw");
+
+        formatButton(aiRace, soloRace, twoRacers, threeRacers, fourRacers, backToDraw);
 
         raceSetupButtons = new ArrayList<JButton>();
         raceSetupButtons.add(aiRace);
@@ -194,11 +200,11 @@ public class UserInterface implements Runnable {
         race = new Race(courseDisplay.getCourse(), racers);
         courseDisplay.setRace(race);
 
-        window.getContentPane().remove(3);
+        window.getContentPane().remove(4);
 
         JPanel raceInfo = new JPanel();
         raceInfo.setPreferredSize(infoPanelDim);
-        BoxLayout layout = new BoxLayout(raceInfo, BoxLayout.Y_AXIS);
+        BorderLayout layout = new BorderLayout();
         raceInfo.setLayout(layout);
 
         String infoText = (racers > 0) ? raceStatus() : "<html>Click course<br>to start</html>";
@@ -210,10 +216,12 @@ public class UserInterface implements Runnable {
         info.setText(infoText);
 
         back = new JButton("Back to Setup");
+        formatButton(back);
+
         back.addActionListener(new RunButtonListener(this));
 
         raceInfo.add(info);
-        raceInfo.add(back);
+        raceInfo.add(back, BorderLayout.SOUTH);
 
         window.getContentPane().add(raceInfo, BorderLayout.WEST);
 
@@ -335,5 +343,20 @@ public class UserInterface implements Runnable {
             back.paintImmediately(back.getVisibleRect());
             worker.resume();
         }
+    }
+
+    // formats button
+    private void formatButton(Dimension dim, int textSize, AbstractButton...buttonList) {
+        for (int i = 0; i < buttonList.length; i++) {
+            buttonList[i].setMinimumSize(dim);
+            buttonList[i].setMaximumSize(dim);
+            buttonList[i].setPreferredSize(dim);
+            buttonList[i].setFont(new Font("Arial", Font.PLAIN, textSize));
+        }
+    }
+
+    // formats button with default
+    private void formatButton(AbstractButton...buttonList) {
+        this.formatButton(BUTTON_DIM, FONT_SIZE, buttonList);
     }
 }
