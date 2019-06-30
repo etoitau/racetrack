@@ -39,9 +39,10 @@ public class UserInterface implements Runnable {
     private boolean firstRun = true;
     // configuration
     private int scale = 25, length = 10, height = 8;
-    private Dimension infoPanelDim = new Dimension(200, height * scale),
-                infoLabelDim = new Dimension(180, height * scale - 40);
-    private final Dimension BUTTON_DIM = new Dimension( 180, 30);
+    private final Dimension COURSE_DIM = new Dimension(length * scale + 1, height * scale + 1),
+            INFO_PANEL_DIM = new Dimension(200, height * scale),
+            INFO_LABEL_DIM = new Dimension(180, height * scale - 40),
+            BUTTON_DIM = new Dimension( 180, 30);
     private final int FONT_SIZE = 14;
 
     // getters and setters
@@ -84,7 +85,7 @@ public class UserInterface implements Runnable {
 
         Course course = new Course(length, height);
         courseDisplay = new CourseDisplay(course, scale);
-        courseDisplay.setPreferredSize(new Dimension(length * scale, height * scale));
+        courseDisplay.setPreferredSize(COURSE_DIM);
 
         message = new JLabel(" ");
 
@@ -111,7 +112,7 @@ public class UserInterface implements Runnable {
         JPanel buttonPanel = new JPanel();
         BoxLayout layout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
         buttonPanel.setLayout(layout);
-        buttonPanel.setPreferredSize(infoPanelDim);
+        buttonPanel.setPreferredSize(INFO_PANEL_DIM);
 
         JToggleButton drawWalls = new JToggleButton("Draw Walls");
         JToggleButton drawStart = new JToggleButton("Draw Start");
@@ -160,7 +161,7 @@ public class UserInterface implements Runnable {
         JPanel buttonPanel = new JPanel();
         BoxLayout layout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
         buttonPanel.setLayout(layout);
-        buttonPanel.setPreferredSize(infoPanelDim);
+        buttonPanel.setPreferredSize(INFO_PANEL_DIM);
 
         JButton aiRace = new JButton("AI Solver");
         JButton soloRace = new JButton("Solo Race");
@@ -203,14 +204,14 @@ public class UserInterface implements Runnable {
         window.getContentPane().remove(4);
 
         JPanel raceInfo = new JPanel();
-        raceInfo.setPreferredSize(infoPanelDim);
+        raceInfo.setPreferredSize(INFO_PANEL_DIM);
         BorderLayout layout = new BorderLayout();
         raceInfo.setLayout(layout);
 
         String infoText = (racers > 0) ? raceStatus() : "<html>Click course<br>to start</html>";
         info = new JTextPane();
         info.setContentType("text/html");
-        info.setMinimumSize(infoLabelDim);
+        info.setMinimumSize(INFO_LABEL_DIM);
         info.setOpaque(false);
         info.setEditable(false);
         info.setText(infoText);

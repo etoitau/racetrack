@@ -75,10 +75,6 @@ public class Race {
     public void updateCar(Car car, Point point) {
         // move car to point
         car.move(point);
-        // check if all possible moves from here are crashes
-        if (car.options().size() == 0) {
-            car.setCrashed(true);
-        }
         // check if just crossed checkpoint
         LineSegment lastMove = car.getLastMove();
         if (lastMove.gateCross(course.getCheckPoint())) {
@@ -89,6 +85,10 @@ public class Race {
             if (lastMove.gateCross(course.getStartLine())) {
                 car.setFinished(true);
             }
+        }
+        // check if all possible moves from here are crashes
+        if (car.options().size() == 0 && !car.isFinished()) {
+            car.setCrashed(true);
         }
     }
 }

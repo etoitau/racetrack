@@ -103,6 +103,10 @@ public class CourseSolver {
         return runStartTime;
     }
 
+    public void setRunStartTime(long time) {
+        this.runStartTime = time;
+    }
+
     // constructor
     public CourseSolver(CourseDisplay cd) {
         this.course = cd.getCourse();

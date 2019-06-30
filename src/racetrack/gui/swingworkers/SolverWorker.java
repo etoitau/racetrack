@@ -66,13 +66,18 @@ public class SolverWorker extends SwingWorker {
 
         // setup the solver and start the clock
         CourseSolver solver = new CourseSolver(courseDisplay);
-        long runStartTime = solver.getRunStartTime();
-        long startTime = runStartTime;
+        long startTime = solver.getRunStartTime();
+        long timePaused = 0;
 
         // as long as not all options are exhausted
         while(solver.hasNext()) {
             // if solver is not paused
             if (!isPaused()) {
+                // if just came unpaused, need to correct runtime
+                if (timePaused > 0) {
+                    solver.setRunStartTime(solver.getRunStartTime() + System.currentTimeMillis() - timePaused);
+                    timePaused = 0;
+                }
                 // get the next run from solver
                 Car car = solver.nextCar();
 
@@ -95,6 +100,9 @@ public class SolverWorker extends SwingWorker {
                 }
             // if paused
             } else {
+                // note time pause started to correct runtime
+                if (timePaused == 0)
+                    timePaused = System.currentTimeMillis();
                 try {
                     // show paused... animation and check for unpause every second
                     StringBuilder sb = new StringBuilder("Paused");
