@@ -1,10 +1,9 @@
 /*
- * Developed by Kyle Chatman
+ * Copyright 2019 Kyle Chatman
  * kchatman.com
  *
- * Licenced under a Creative Commons Attribution-NonCommercial 4.0 International License
- * https://creativecommons.org/licenses/by-nc/4.0/
- *
+ * Licensed under the GNU General Public License v.3.0
+ * https://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
 
