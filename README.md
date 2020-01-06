@@ -5,8 +5,8 @@ My first Java project after taking the mooc.fi Object Oriented Programming with 
 
 Developed with IntelliJ Community Edition using JDK 8
 
-##License:
-Copyright 2019 [Kyle Chatman](http://www.kchatman.com)
+## License:
+Copyright 2019-2020 [Kyle Chatman](http://www.kchatman.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/
 
-##Source code:
+## Source code:
 https://github.com/etoitau/racetrack
 
-##JAR file:
+## JAR file:
 https://github.com/etoitau/racetrack/raw/master/out/artifacts/racetrack_jar/racetrack.jar
 
-##Walkthrough video:
+## Walkthrough video:
 https://youtu.be/EOSjJFU5OPY
